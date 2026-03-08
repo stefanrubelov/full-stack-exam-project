@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
-import { LayoutDashboard, Wind, Bell, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Wind, Bell, LogOut, User, Terminal } from 'lucide-react';
 
 interface Props {
   alertCount?: number;
@@ -42,6 +42,7 @@ export default function Layout({ children, alertCount = 0 }: Props) {
           <div className="px-4 pb-2 text-[0.7rem] text-faint uppercase tracking-[0.8px]">
             Navigation
           </div>
+
           <NavLink to="/dashboard" className={navLinkClass}>
             <LayoutDashboard size={17} />
             Dashboard
@@ -55,6 +56,11 @@ export default function Layout({ children, alertCount = 0 }: Props) {
                 {alertCount > 99 ? '99+' : alertCount}
               </span>
             )}
+          </NavLink>
+
+          <NavLink to="/command-logs" className={navLinkClass}>
+            <Terminal size={17} />
+            Command Logs
           </NavLink>
         </div>
 

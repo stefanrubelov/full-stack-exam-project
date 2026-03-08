@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import TurbineDetailPage from './pages/TurbineDetailPage';
 import AlertsPage from './pages/AlertsPage';
+import CommandLogsPage from './pages/CommandLogsPage';
 
 const alertSse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
 
@@ -81,6 +82,7 @@ function AppRoutes() {
       <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
       <Route path="/turbines/:id" element={<PrivateRoute><TurbineDetailPage /></PrivateRoute>} />
       <Route path="/alerts" element={<PrivateRoute><AlertsPage /></PrivateRoute>} />
+      <Route path="/command-logs" element={<PrivateRoute><CommandLogsPage /></PrivateRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

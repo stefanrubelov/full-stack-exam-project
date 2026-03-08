@@ -137,7 +137,8 @@ export const turbinesApi = {
   getById: (id: string) => apiGet<TurbineStatusDto>(`/api/turbines/${id}`),
   getMetrics: (id: string, limit = 50) =>
     apiGet<TurbineMetric[]>(`/api/turbines/${id}/metrics?limit=${limit}`),
-  getCommands: (id: string) => apiGet<TurbineCommand[]>(`/api/turbines/${id}/commands`),
+  getCommands: (id: string, page = 1, pageSize = 20) =>
+    apiGet<CommandsPage>(`/api/turbines/${id}/commands?page=${page}&pageSize=${pageSize}`),
   getMetricsHistory: (id: string, from?: string, to?: string, granularity = 'day') => {
     const params = new URLSearchParams({ granularity });
     if (from) params.set('from', from);
@@ -146,6 +147,29 @@ export const turbinesApi = {
   },
   sendCommand: (id: string, action: string, params?: Record<string, unknown>) =>
     apiPost<TurbineCommand>(`/api/turbines/${id}/commands`, { action, ...params }),
+};
+
+// ─── Commands API ────────────────────────────────────────────────────────────
+
+export interface CommandsPage {
+  total: number;
+  page: number;
+  pageSize: number;
+  items: TurbineCommand[];
+}
+
+export const commandsApi = {
+  getAll: (params?: { from?: string; to?: string; turbineId?: string; userName?: string; page?: number; pageSize?: number }) => {
+    const p = new URLSearchParams();
+    if (params?.from) p.set('from', params.from);
+    if (params?.to) p.set('to', params.to);
+    if (params?.turbineId) p.set('turbineId', params.turbineId);
+    if (params?.userName) p.set('userName', params.userName);
+    if (params?.page) p.set('page', String(params.page));
+    if (params?.pageSize) p.set('pageSize', String(params.pageSize));
+    const qs = p.toString();
+    return apiGet<CommandsPage>(`/api/commands${qs ? `?${qs}` : ''}`);
+  },
 };
 
 // ─── Alerts API ──────────────────────────────────────────────────────────────
