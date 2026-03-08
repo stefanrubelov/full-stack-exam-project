@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
@@ -59,6 +60,54 @@ public class TurbinesController(
         return Ok(metrics);
     }
 
+    [HttpGet("{id}/metrics/history")]
+    public ActionResult<List<MetricHistoryPointDto>> GetMetricsHistory(
+        string id,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] string granularity = "day")
+    {
+        var fromUtc = from.HasValue
+            ? DateTime.SpecifyKind(from.Value, DateTimeKind.Utc)
+            : DateTime.UtcNow.AddDays(-30);
+        var toUtc = to.HasValue
+            ? DateTime.SpecifyKind(to.Value, DateTimeKind.Utc)
+            : DateTime.UtcNow;
+
+        var metrics = db.TurbineMetrics
+            .Where(m => m.TurbineId == id && m.Timestamp >= fromUtc && m.Timestamp <= toUtc)
+            .OrderBy(m => m.Timestamp)
+            .ToList();
+
+        var result = metrics
+            .GroupBy(m => GetPeriodKey(m.Timestamp, granularity))
+            .OrderBy(g => g.Key)
+            .Select(g => new MetricHistoryPointDto(
+                Period: g.Key,
+                WindSpeed: g.Average(m => m.WindSpeed),
+                PowerOutput: g.Average(m => m.PowerOutput),
+                RotorSpeed: g.Average(m => m.RotorSpeed),
+                BladePitch: g.Average(m => m.BladePitch),
+                GeneratorTemp: g.Average(m => m.GeneratorTemp),
+                GearboxTemp: g.Average(m => m.GearboxTemp),
+                Vibration: g.Average(m => m.Vibration),
+                AmbientTemperature: g.Average(m => m.AmbientTemperature),
+                DataPoints: g.Count()
+            ))
+            .ToList();
+
+        return Ok(result);
+    }
+
+    private static string GetPeriodKey(DateTime ts, string granularity) => granularity switch
+    {
+        "week"    => $"{ts.Year}-W{ISOWeek.GetWeekOfYear(ts):D2}",
+        "month"   => ts.ToString("yyyy-MM"),
+        "quarter" => $"{ts.Year}-Q{(ts.Month - 1) / 3 + 1}",
+        "year"    => ts.Year.ToString(),
+        _         => ts.ToString("yyyy-MM-dd"),
+    };
+
     [HttpGet("{id}/commands")]
     public ActionResult<List<TurbineCommand>> GetCommands(string id)
     {
@@ -93,6 +142,13 @@ public class TurbinesController(
         var topic = $"farm/{turbine.FarmId}/windmill/{turbine.Id}/command";
 
         await mqttClient.PublishAsync(topic, payloadJson);
+
+        if (request.Action is "stop" or "start")
+        {
+            turbine.Status = request.Action == "stop" ? "stopped" : "running";
+            turbine.LastSeen = DateTime.UtcNow;
+            db.WindTurbines.Update(turbine);
+        }
 
         var cmd = new TurbineCommand
         {

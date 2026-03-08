@@ -111,6 +111,27 @@
         }
       }
     },
+    "/api/Farm": {
+      "get": {
+        "tags": [
+          "Farm"
+        ],
+        "operationId": "Farm_Get",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Turbines": {
       "get": {
         "tags": [
@@ -211,6 +232,74 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/TurbineMetric"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/Turbines/{id}/metrics/history": {
+      "get": {
+        "tags": [
+          "Turbines"
+        ],
+        "operationId": "Turbines_GetMetricsHistory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "x-position": 2
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "granularity",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "day"
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetricHistoryPointDto"
                   }
                 }
               }
@@ -448,6 +537,83 @@
             "description": ""
           }
         }
+      }
+    },
+    "/api/Health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "operationId": "Health_GetApiHealth",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Health/db": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "operationId": "Health_GetDbHealth",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Alerts/test": {
+      "post": {
+        "tags": [
+          "Alerts"
+        ],
+        "operationId": "Alerts_CreateTestAlert",
+        "parameters": [
+          {
+            "name": "turbineId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurbineAlert"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/Alerts": {
@@ -721,6 +887,51 @@
           },
           "status": {
             "type": "string"
+          }
+        }
+      },
+      "MetricHistoryPointDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "period": {
+            "type": "string"
+          },
+          "windSpeed": {
+            "type": "number",
+            "format": "double"
+          },
+          "powerOutput": {
+            "type": "number",
+            "format": "double"
+          },
+          "rotorSpeed": {
+            "type": "number",
+            "format": "double"
+          },
+          "bladePitch": {
+            "type": "number",
+            "format": "double"
+          },
+          "generatorTemp": {
+            "type": "number",
+            "format": "double"
+          },
+          "gearboxTemp": {
+            "type": "number",
+            "format": "double"
+          },
+          "vibration": {
+            "type": "number",
+            "format": "double"
+          },
+          "ambientTemperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "dataPoints": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

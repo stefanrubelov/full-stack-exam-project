@@ -11,4 +11,5 @@ public class ConnectionStrings
     public string Redis { get; set; }
 
     public string Secret { get; set; }
+    public string FarmId { get; set; }
 }

@@ -60,6 +60,8 @@ public class Startup
             await app.GenerateApiClientsFromOpenApi("../client/src/generated-ts-client.ts", "./openapi.json");
 
         SeedDatabase(app);
+        if (app.Environment.IsDevelopment())
+            SeedHistoricalData(app);
     }
 
     // -------------------------------------------------------------------------
@@ -146,6 +148,7 @@ public class Startup
 
         services.AddCors();
         services.AddScoped<Seeder>();
+        services.AddScoped<HistoricalDataSeeder>();
     }
 
     private async Task ConnectMqtt(WebApplication app)
@@ -162,5 +165,11 @@ public class Startup
     {
         using var scope = app.Services.CreateScope();
         scope.ServiceProvider.GetRequiredService<Seeder>().Seed();
+    }
+
+    private static void SeedHistoricalData(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        scope.ServiceProvider.GetRequiredService<HistoricalDataSeeder>().Seed();
     }
 }

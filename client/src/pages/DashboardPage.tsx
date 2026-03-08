@@ -3,7 +3,7 @@ import { StateleSSEClient } from 'statele-sse';
 import Layout from '../components/Layout';
 import TurbineCard from '../components/TurbineCard';
 import AlertsPanel from '../components/AlertsPanel';
-import { type TurbineStatusDto, type TurbineAlert, realtimeApi } from '../api/apiClient';
+import { type TurbineStatusDto, type TurbineAlert, realtimeApi, farmApi } from '../api/apiClient';
 import { Wind, Activity, Zap, Bell } from 'lucide-react';
 
 const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
@@ -21,24 +21,30 @@ export default function DashboardPage() {
   const [turbines, setTurbines] = useState<TurbineStatusDto[]>([]);
   const [alerts, setAlerts] = useState<TurbineAlert[]>([]);
   const [connected, setConnected] = useState(false);
+  const [farmId, setFarmId] = useState<string | null>(null);
+
+  useEffect(() => {
+    farmApi.get().then(d => setFarmId(d.farmId)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     let mounted = true;
 
-    sse.listen(
-      async (id) => {
-        const result = await realtimeApi.getTurbines(id);
-        return result;
-      },
+    const unsubTurbines = sse.listen(
+      async (id) => realtimeApi.getTurbines(id),
       (data) => { if (mounted) { setTurbines(data); setConnected(true); } }
     );
 
-    sse.listen(
+    const unsubAlerts = sse.listen(
       async (id) => realtimeApi.getTurbineAlerts(id),
       (data) => { if (mounted) setAlerts(data); }
     );
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      unsubTurbines();
+      unsubAlerts();
+    };
   }, []);
 
   const running = turbines.filter(t => t.turbine.status === 'running').length;
@@ -67,6 +73,7 @@ export default function DashboardPage() {
           </div>
           <p className="text-dim text-sm">
             Monitoring {turbines.length} turbine{turbines.length !== 1 ? 's' : ''} in real-time
+            {farmId && <span className="ml-2 text-faint">· Farm <span className="font-mono">{farmId}</span></span>}
           </p>
         </div>
 
@@ -121,7 +128,12 @@ export default function DashboardPage() {
               )}
             </div>
             <div className="bg-card border border-edge rounded-[10px] p-4">
-              <AlertsPanel alerts={alerts} />
+              <AlertsPanel alerts={alerts.slice(0, 5)} />
+              {alerts.length > 5 && (
+                <p className="mt-3 text-center text-[0.75rem] text-faint">
+                  +{alerts.length - 5} more — <a href="/alerts" className="text-accent hover:underline">view all</a>
+                </p>
+              )}
             </div>
           </div>
         </div>

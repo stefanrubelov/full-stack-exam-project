@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import AlertsPanel from '../components/AlertsPanel';
 import { type TurbineAlert, realtimeApi, alertsApi } from '../api/apiClient';
 import { Bell, CheckCheck } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
 
@@ -24,11 +25,17 @@ export default function AlertsPage() {
 
   useEffect(() => {
     let mounted = true;
-    sse.listen(
+    const unsub = sse.listen(
       async (id) => realtimeApi.getTurbineAlerts(id),
-      (data) => { if (mounted) setAlerts(data); }
+      (data) => {
+        if (!mounted) return;
+        setAlerts(data);
+      }
     );
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      unsub();
+    };
   }, []);
 
   useEffect(() => {
@@ -36,6 +43,7 @@ export default function AlertsPage() {
   }, [showAcknowledged]);
 
   const handleAcknowledge = () => {
+    toast.success('Alert acknowledged');
     if (showAcknowledged) refreshAcknowledged();
   };
 
@@ -44,7 +52,7 @@ export default function AlertsPage() {
 
   return (
     <Layout alertCount={alerts.length}>
-      <div className="px-8 py-7 max-w-[900px] w-full">
+      <div className="px-8 py-7 max-w-[1400px] w-full">
         <div className="mb-6">
           <div className="flex items-center gap-2.5 mb-1.5">
             <Bell size={22} className="text-ink" />
@@ -90,18 +98,18 @@ export default function AlertsPage() {
                 {acknowledgedAlerts.map(a => (
                   <div
                     key={a.id}
-                    className="px-3.5 py-2.5 bg-canvas rounded-lg border border-edge opacity-70"
+                    className="px-3.5 py-2.5 bg-canvas rounded-lg border border-edge"
                   >
                     <div className="flex gap-2 items-center mb-1">
                       <span className="inline-flex items-center gap-[5px] px-2.5 py-[3px] rounded-[20px] text-[0.72rem] font-semibold uppercase tracking-[0.5px] bg-muted/[12%] text-muted">
                         {a.severity}
                       </span>
-                      <span className="text-xs text-faint">
-                        Turbine {a.turbineId.substring(0, 12)}…
+                      <span className="text-xs text-ink/60">
+                        Turbine {a.turbineId}
                       </span>
                     </div>
-                    <p className="text-[0.85rem] text-dim">{a.message}</p>
-                    <p className="text-[0.72rem] text-faint mt-1">
+                    <p className="text-[0.85rem] text-ink">{a.message}</p>
+                    <p className="text-[0.75rem] text-ink/50 mt-1">
                       Acknowledged {a.acknowledgedAt ? new Date(a.acknowledgedAt).toLocaleString() : ''}
                     </p>
                   </div>

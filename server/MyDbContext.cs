@@ -20,7 +20,6 @@ public class MyDbContext : DbContext
     public DbSet<Measurement> Measurements { get; set; }
 
     // Wind turbine entities
-    public DbSet<WindFarm> WindFarms { get; set; }
     public DbSet<WindTurbine> WindTurbines { get; set; }
     public DbSet<TurbineMetric> TurbineMetrics { get; set; }
     public DbSet<TurbineAlert> TurbineAlerts { get; set; }

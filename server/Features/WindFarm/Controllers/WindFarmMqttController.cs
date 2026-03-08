@@ -6,19 +6,20 @@ namespace server.Features.WindFarm.Controllers;
 
 public class WindFarmMqttController(
     MyDbContext db,
+    ConnectionStrings connectionStrings,
     ILogger<WindFarmMqttController> logger) : MqttController
 {
     [MqttRoute("farm/+/windmill/{turbineId}/telemetry")]
     public async Task HandleTelemetry(string turbineId, TurbineTelemetry telemetry)
     {
-        logger.LogInformation("Telemetry received for turbine {TurbineId} in farm {FarmId}", turbineId, telemetry.FarmId);
-
-        var farm = await db.WindFarms.FindAsync(telemetry.FarmId);
-        if (farm == null)
+        if (!string.IsNullOrWhiteSpace(connectionStrings.FarmId) &&
+            !string.Equals(telemetry.FarmId, connectionStrings.FarmId, StringComparison.OrdinalIgnoreCase))
         {
-            farm = new server.Entities.WindFarm { Id = telemetry.FarmId, Name = "Offshore Wind Farm" };
-            db.WindFarms.Add(farm);
+            logger.LogDebug("Ignoring telemetry from foreign farm {FarmId}", telemetry.FarmId);
+            return;
         }
+
+        logger.LogInformation("Telemetry received for turbine {TurbineId} in farm {FarmId}", turbineId, telemetry.FarmId);
 
         var turbine = await db.WindTurbines.FindAsync(telemetry.TurbineId);
         if (turbine == null)
@@ -35,7 +36,7 @@ public class WindFarmMqttController(
         }
         else
         {
-            turbine.Status = telemetry.Status;
+            // Status is owned by commands (stop/start) — only LastSeen is updated from telemetry
             turbine.LastSeen = telemetry.Timestamp.ToUniversalTime();
             db.WindTurbines.Update(turbine);
         }
@@ -67,6 +68,13 @@ public class WindFarmMqttController(
     [MqttRoute("farm/+/windmill/{turbineId}/alert")]
     public async Task HandleAlert(string turbineId, TurbineAlertPayload alertPayload)
     {
+        if (!string.IsNullOrWhiteSpace(connectionStrings.FarmId) &&
+            !string.Equals(alertPayload.FarmId, connectionStrings.FarmId, StringComparison.OrdinalIgnoreCase))
+        {
+            logger.LogDebug("Ignoring alert from foreign farm {FarmId}", alertPayload.FarmId);
+            return;
+        }
+
         logger.LogWarning("Alert from turbine {TurbineId}: [{Severity}] {Message}", turbineId, alertPayload.Severity, alertPayload.Message);
 
         db.TurbineAlerts.Add(new TurbineAlert
