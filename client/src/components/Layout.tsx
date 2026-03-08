@@ -23,9 +23,9 @@ export default function Layout({ children, alertCount = 0 }: Props) {
     }`;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <nav className="flex flex-col w-[220px] min-h-screen bg-canvas border-r border-edge shrink-0">
+      <nav className="flex flex-col w-[220px] h-screen sticky top-0 bg-canvas border-r border-edge shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-5 border-b border-edge">
           <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-500 to-accent flex items-center justify-center shrink-0">
