@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StateleSSEClient } from 'statele-sse';
 import Layout from '../components/Layout';
 import AlertsPanel from '../components/AlertsPanel';
