@@ -7,7 +7,7 @@ import AlertsPanel from '../components/AlertsPanel';
 import TurbineControls, { CommandHistory } from '../components/TurbineControls';
 import MetricsHistoryTab from '../components/MetricsHistoryTab';
 import {
-  type TurbineMetric, type TurbineAlert, type TurbineCommand, type TurbineStatusDto, type CommandsPage,
+  type TurbineMetric, type TurbineAlert, type TurbineStatusDto, type CommandsPage,
   realtimeApi, turbinesApi, alertsApi,
 } from '../api/apiClient';
 import Pagination from '../components/Pagination';
