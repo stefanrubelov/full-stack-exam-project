@@ -1,68 +1,49 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@theme {
+  --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  --color-surface: #0b1120;
+  --color-canvas: #111827;
+  --color-card: #1a2236;
+  --color-lift: #1f2e47;
+  --color-edge: #2a3a52;
+  --color-edge-light: #334155;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
+  --color-ink: #f0f6ff;
+  --color-dim: #8ea4c4;
+  --color-faint: #4d6280;
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  --color-accent: #38bdf8;
+  --color-accent-dark: #0284c7;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-muted: #64748b;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    min-width: 320px;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+  }
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
   }
   a:hover {
-    color: #747bff;
+    text-decoration: underline;
   }
-  button {
-    background-color: #f9f9f9;
-  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #111827; }
+  ::-webkit-scrollbar-thumb { background: #2a3a52; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #334155; }
 }

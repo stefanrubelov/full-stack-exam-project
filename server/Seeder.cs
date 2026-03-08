@@ -1,33 +1,31 @@
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using server.Entities;
 
 namespace server;
 
-public class Seeder(MyDbContext ctx, ILogger<Seeder> logger)
+public class Seeder(MyDbContext ctx, ILogger<Seeder> logger, IPasswordHasher<User> passwordHasher)
 {
     public void Seed()
     {
-        logger.LogInformation("adding a test user + pasting the recreate script for reproducing the schema");
+        logger.LogInformation("Seeding database...");
         logger.LogInformation(ctx.Database.GenerateCreateScript());
         ctx.Database.EnsureCreated();
-        var exists = ctx.Users.Any(u => u.Id == "test");
+
+        var exists = ctx.Users.Any(u => u.Email == "test@test.com");
         if (!exists)
         {
-
-            var salt = "word";
-            var password = "pass";
-            ctx.Users.Add(new User()
+            var user = new User
             {
-                Id = Guid.NewGuid().ToString(),
-                Nickname = "test",
-                //password is "pass", salt is "word"
-                Hash = Convert.ToBase64String(
-                    SHA256.HashData(
-                        Encoding.UTF8.GetBytes(password + salt))),
-                Salt = salt,
-            });
+                Name = "Test User",
+                Email = "test@test.com",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            user.Password = passwordHasher.HashPassword(user, "password123");
+            ctx.Users.Add(user);
             ctx.SaveChanges();
+            logger.LogInformation("Test user created: test@test.com / password123");
         }
     }
 }

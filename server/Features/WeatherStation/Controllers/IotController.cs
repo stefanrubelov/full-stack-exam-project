@@ -1,10 +1,11 @@
 using System.Text.Json;
 using Mqtt.Controllers;
-using server;
 
-public class IotController(ILogger<IotController> logger,
-    MyDbContext db
-    ) : MqttController
+namespace server.Features.WeatherStation.Controllers;
+
+public class IotController(
+    ILogger<IotController> logger,
+    MyDbContext db) : MqttController
 {
     [MqttRoute("station/aaa/sensor/{sensorId}/telemetry")]
     public async Task ListenForMeasurements(Measurement m, string sensorId)

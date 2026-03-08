@@ -1,0 +1,111 @@
+import { useState, type FormEvent } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/useAuth';
+import { authApi } from '../api/apiClient';
+import { Wind, LogIn } from 'lucide-react';
+
+const inputClass = 'w-full bg-canvas border border-edge rounded-md text-ink text-sm px-3 py-[9px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(56,189,248,0.15)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans';
+
+export default function LoginPage() {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { token } = await authApi.login(email, password);
+      login(token);
+      navigate('/dashboard');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-surface p-6">
+      {/* Background glow */}
+      <div className="fixed top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(56,189,248,0.06)_0%,transparent_70%)] pointer-events-none" />
+
+      <div className="w-full max-w-[400px]">
+        {/* Logo */}
+        <div className="text-center mb-9">
+          <div className="w-14 h-14 rounded-[14px] bg-gradient-to-br from-sky-500 to-accent flex items-center justify-center mx-auto mb-4 shadow-[0_0_32px_rgba(56,189,248,0.25)]">
+            <Wind size={28} color="#0b1120" />
+          </div>
+          <h1 className="text-2xl font-bold text-ink">WindWatch</h1>
+          <p className="text-dim mt-1 text-sm">Offshore Wind Farm Monitor</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-card border border-edge rounded-[10px] px-8 py-7">
+          <h2 className="mb-6 text-[1.1rem] font-semibold text-ink">Sign in to your account</h2>
+
+          {error && (
+            <div className="px-3.5 py-2.5 rounded-md text-[0.85rem] bg-danger/[12%] text-danger border border-danger/30 mb-4">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className="text-[0.8rem] font-medium text-dim tracking-[0.3px]">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                className={inputClass}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="password" className="text-[0.8rem] font-medium text-dim tracking-[0.3px]">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className={inputClass}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-1 flex items-center justify-center gap-1.5 px-5 py-[11px] text-[0.9rem] font-semibold rounded-md bg-accent text-surface cursor-pointer border-none transition-all duration-150 hover:bg-sky-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading
+                ? <span className="inline-block w-[18px] h-[18px] rounded-full border-2 border-surface/40 border-t-surface animate-spin shrink-0" />
+                : <LogIn size={16} />
+              }
+              {loading ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+        </div>
+
+        <p className="text-center mt-5 text-dim text-sm">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-accent font-medium">Register</Link>
+        </p>
+      </div>
+    </div>
+  );
+}
