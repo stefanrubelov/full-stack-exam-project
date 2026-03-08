@@ -40,12 +40,6 @@ public class Startup
     public async Task Configure(WebApplication app)
     {
         app.UseExceptionHandler();
-        app.UseOpenApi();
-        app.UseSwaggerUi();
-        app.UseAuthentication();
-        app.UseAuthorization();
-        app.MapControllers();
-        app.UseStaticFiles();
         app.UseCors(c => c
             .AllowAnyHeader()
             .AllowAnyMethod()
@@ -53,6 +47,12 @@ public class Startup
                 "https://full-stack-exam-project.vercel.app",
                 "http://localhost:5173"
             ));
+        app.UseOpenApi();
+        app.UseSwaggerUi();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapControllers();
+        app.UseStaticFiles();
 
         await ConnectMqtt(app);
 
@@ -153,12 +153,20 @@ public class Startup
 
     private async Task ConnectMqtt(WebApplication app)
     {
-        var mqttClient = app.Services.GetRequiredService<IMqttClientService>();
-        await mqttClient.ConnectAsync(
-            _connectionStrings.MqttBroker,
-            _connectionStrings.MqttPort,
-            username: "",
-            password: "");
+        var logger = app.Services.GetRequiredService<ILogger<Startup>>();
+        try
+        {
+            var mqttClient = app.Services.GetRequiredService<IMqttClientService>();
+            await mqttClient.ConnectAsync(
+                _connectionStrings.MqttBroker,
+                _connectionStrings.MqttPort,
+                username: "",
+                password: "");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("MQTT connection failed: {Message}. The server will start without real-time telemetry.", ex.Message);
+        }
     }
 
     private static void SeedDatabase(WebApplication app)
