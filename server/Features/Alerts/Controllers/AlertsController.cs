@@ -11,9 +11,51 @@ namespace server.Features.Alerts.Controllers;
 [Authorize]
 public class AlertsController(
     MyDbContext db,
+    IWebHostEnvironment env,
     ILogger<AlertsController> logger
 ) : ControllerBase
 {
+    private static readonly string[] Severities = ["warning", "critical"];
+    private static readonly string[] Messages =
+    [
+        "High wind speed: 26.4 m/s (threshold: 25 m/s)",
+        "Generator overheating: 83.2°C (threshold: 80°C)",
+        "Gearbox overheating: 81.7°C (threshold: 80°C)",
+        "High vibration: 11.34 (threshold: 10)",
+    ];
+
+    [HttpPost("test")]
+    public async Task<ActionResult<TurbineAlert>> CreateTestAlert([FromQuery] string turbineId)
+    {
+        if (!env.IsDevelopment())
+            return Forbid();
+
+        var turbine = db.WindTurbines.Find(turbineId);
+        if (turbine == null) throw new NotFoundError("Turbine", turbineId);
+
+        var rng      = Random.Shared;
+        var message  = Messages[rng.Next(Messages.Length)];
+        var severity = message.StartsWith("High wind") ? "critical" : "warning";
+
+        var alert = new TurbineAlert
+        {
+            Id             = Guid.NewGuid(),
+            TurbineId      = turbineId,
+            FarmId         = turbine.FarmId,
+            Timestamp      = DateTime.UtcNow,
+            Severity       = severity,
+            Message        = message,
+            IsAcknowledged = false,
+        };
+
+        db.TurbineAlerts.Add(alert);
+        await db.SaveChangesAsync();
+
+        logger.LogInformation("Test alert created for turbine {TurbineId}", turbineId);
+        return Ok(alert);
+    }
+
+
     [HttpGet]
     public ActionResult<List<TurbineAlert>> GetAll(
         [FromQuery] bool includeAcknowledged = false,

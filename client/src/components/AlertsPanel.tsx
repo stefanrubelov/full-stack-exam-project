@@ -55,44 +55,47 @@ export default function AlertsPanel({ alerts, onAcknowledge, turbineId }: Props)
       {visible.map(alert => (
         <div
           key={alert.id}
-          className={`flex items-start gap-2.5 px-3.5 py-3 rounded-md border ${
+          className={`flex flex-col gap-3 px-3.5 py-3 rounded-md border ${
             alert.severity === 'critical'
               ? 'bg-danger/[12%] border-danger/30'
               : 'bg-warning/[12%] border-warning/30'
           }`}
         >
-          <div className="pt-px shrink-0">
-            <SeverityIcon severity={alert.severity} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className={`inline-flex items-center gap-[5px] px-2.5 py-[3px] rounded-[20px] text-[0.72rem] font-semibold uppercase tracking-[0.5px] ${
-                alert.severity === 'critical' ? 'bg-danger/[12%] text-danger' : 'bg-warning/[12%] text-warning'
-              }`}>
-                {alert.severity}
-              </span>
-              {!turbineId && (
-                <span className="text-xs text-faint">
-                  Turbine {alert.turbineId.substring(0, 8)}…
-                </span>
-              )}
+          <div className="flex items-start gap-2.5">
+            <div className="pt-px shrink-0">
+              <SeverityIcon severity={alert.severity} />
             </div>
-            <p className="text-[0.85rem] text-ink mb-1">{alert.message}</p>
-            <p className="text-[0.72rem] text-faint">{timeAgo(alert.timestamp)}</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className={`inline-flex items-center gap-[5px] px-2.5 py-[3px] rounded-[20px] text-[0.72rem] font-semibold uppercase tracking-[0.5px] ${
+                  alert.severity === 'critical' ? 'bg-danger/[12%] text-danger' : 'bg-warning/[12%] text-warning'
+                }`}>
+                  {alert.severity}
+                </span>
+                {!turbineId && (
+                  <span className="text-xs text-ink/70">
+                    Turbine {alert.turbineId}
+                  </span>
+                )}
+              </div>
+              <p className="text-[0.85rem] text-ink mb-2">{alert.message}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[0.75rem] text-ink/60">{timeAgo(alert.timestamp)}</p>
+                <button
+                  onClick={() => acknowledge(alert.id)}
+                  disabled={ackingId === alert.id}
+                  className="flex items-center gap-2 bg-accent/15 border border-accent/40 text-accent rounded-md px-4 py-2 text-[0.82rem] font-medium cursor-pointer hover:bg-accent/25 transition-colors duration-150 disabled:opacity-50"
+                >
+                  {ackingId === alert.id ? (
+                    <span className="inline-block w-3.5 h-3.5 rounded-full border-[1.5px] border-accent/40 border-t-accent animate-spin shrink-0" />
+                  ) : (
+                    <CheckCircle size={15} />
+                  )}
+                  Acknowledge
+                </button>
+              </div>
+            </div>
           </div>
-          <button
-            onClick={() => acknowledge(alert.id)}
-            disabled={ackingId === alert.id}
-            title="Acknowledge alert"
-            className="flex items-center gap-1 bg-transparent border border-edge rounded-md px-2 py-1 text-dim text-xs cursor-pointer shrink-0 hover:text-ink transition-colors duration-150 disabled:opacity-50"
-          >
-            {ackingId === alert.id ? (
-              <span className="inline-block w-3 h-3 rounded-full border-[1.5px] border-edge border-t-accent animate-spin shrink-0" />
-            ) : (
-              <CheckCircle size={13} />
-            )}
-            Ack
-          </button>
         </div>
       ))}
     </div>

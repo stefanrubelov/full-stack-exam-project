@@ -5,11 +5,14 @@ import Layout from '../components/Layout';
 import MetricsChart, { type MetricConfig } from '../components/MetricsChart';
 import AlertsPanel from '../components/AlertsPanel';
 import TurbineControls, { CommandHistory } from '../components/TurbineControls';
+import MetricsHistoryTab from '../components/MetricsHistoryTab';
 import {
   type TurbineMetric, type TurbineAlert, type TurbineCommand, type TurbineStatusDto,
   realtimeApi, turbinesApi, alertsApi,
 } from '../api/apiClient';
-import { ArrowLeft, Wind, Zap, Thermometer, Activity, Compass, RotateCcw, Waves, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Wind, Zap, Thermometer, Activity, Compass, RotateCcw, Waves, AlertTriangle, Settings, ChevronDown } from 'lucide-react';
+
+const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
 
 const METRIC_CHARTS: MetricConfig[] = [
   { key: 'windSpeed',           label: 'Wind Speed',      unit: 'm/s', color: '#38bdf8' },
@@ -41,8 +44,10 @@ export default function TurbineDetailPage() {
   const [turbineData, setTurbineData] = useState<TurbineStatusDto | null>(null);
   const [metrics, setMetrics] = useState<TurbineMetric[]>([]);
   const [alerts, setAlerts] = useState<TurbineAlert[]>([]);
+  const [allAlerts, setAllAlerts] = useState<TurbineAlert[]>([]);
   const [commands, setCommands] = useState<TurbineCommand[]>([]);
-  const [activeTab, setActiveTab] = useState<'metrics' | 'alerts' | 'controls' | 'history'>('metrics');
+  const [activeTab, setActiveTab] = useState<'metrics' | 'alerts' | 'history' | 'data-history'>('metrics');
+  const [controlsOpen, setControlsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const refreshCommands = useCallback(async () => {
@@ -76,6 +81,7 @@ export default function TurbineDetailPage() {
         ]);
         setTurbineData(td);
         setCommands(cmds);
+        setAllAlerts(al);
         setAlerts(al.filter(a => a.turbineId === id));
       } catch (e) {
         console.error(e);
@@ -87,33 +93,48 @@ export default function TurbineDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
     let mounted = true;
 
-    sse.listen(
+    const unsubMetrics = sse.listen(
       async (connectionId) => realtimeApi.getTurbineMetrics(connectionId, id),
       (data) => {
         if (!mounted) return;
         setMetrics(data);
         if (data.length > 0) {
+          setTurbineData(prev => prev ? { ...prev, latestMetric: data[0] } : prev);
+        }
+      }
+    );
+
+    const unsubTurbines = sse.listen(
+      async (connectionId) => realtimeApi.getTurbines(connectionId),
+      (data) => {
+        if (!mounted) return;
+        const match = data.find(t => t.turbine.id === id);
+        if (match) {
           setTurbineData(prev => prev ? {
             ...prev,
-            turbine: { ...prev.turbine, status: data[0].status },
-            latestMetric: data[0],
+            turbine: { ...prev.turbine, status: match.turbine.status },
           } : prev);
         }
       }
     );
 
-    sse.listen(
+    const unsubAlerts = sse.listen(
       async (connectionId) => realtimeApi.getTurbineAlerts(connectionId),
       (data) => {
         if (!mounted) return;
+        setAllAlerts(data);
         setAlerts(data.filter(a => a.turbineId === id));
       }
     );
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      unsubMetrics();
+      unsubTurbines();
+      unsubAlerts();
+    };
   }, [id]);
 
   if (loading) {
@@ -148,14 +169,14 @@ export default function TurbineDetailPage() {
   const alertCount = alerts.length;
 
   const tabs = [
-    { id: 'metrics',  label: 'Live Metrics' },
-    { id: 'alerts',   label: `Alerts${alertCount > 0 ? ` (${alertCount})` : ''}` },
-    { id: 'controls', label: 'Controls' },
-    { id: 'history',  label: 'Command History' },
+    { id: 'metrics',      label: 'Live Metrics' },
+    { id: 'alerts',       label: `Alerts${alertCount > 0 ? ` (${alertCount})` : ''}` },
+    { id: 'data-history', label: 'Data History' },
+    { id: 'history',      label: 'Command History' },
   ] as const;
 
   return (
-    <Layout alertCount={alertCount}>
+    <Layout alertCount={allAlerts.length}>
       <div className="px-8 py-7 max-w-[1400px] w-full">
         {/* Back */}
         <button
@@ -166,7 +187,7 @@ export default function TurbineDetailPage() {
         </button>
 
         {/* Turbine header */}
-        <div className="flex items-start justify-between mb-6 flex-wrap gap-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
           <div className="flex items-center gap-4">
             <div className="w-[52px] h-[52px] rounded-xl bg-gradient-to-br from-sky-500 to-accent flex items-center justify-center shrink-0">
               <Wind size={26} color="#0b1120" />
@@ -179,25 +200,34 @@ export default function TurbineDetailPage() {
                 </span>
               </div>
               <p className="text-faint text-[0.8rem]">
-                Farm ID: {turbine.farmId} · Turbine ID: {turbine.id.substring(0, 12)}…
+                Turbine ID: {turbine.id.substring(0, 12)}…
               </p>
             </div>
           </div>
+          <button
+            onClick={() => setControlsOpen(o => !o)}
+            className={`flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg border transition-all duration-150 cursor-pointer ${
+              controlsOpen
+                ? 'bg-accent/10 border-accent/40 text-accent'
+                : 'bg-card border-edge text-ink hover:bg-lift hover:border-edge-light'
+            }`}
+          >
+            <Settings size={15} className={`transition-transform duration-300 ${controlsOpen ? 'rotate-45' : ''}`} />
+            Controls
+            <ChevronDown size={14} className={`transition-transform duration-300 ${controlsOpen ? 'rotate-180' : ''}`} />
+          </button>
         </div>
 
-        {/* Current metrics snapshot */}
-        {m && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <SnapCard icon={<Wind size={16} />} label="Wind Speed" value={`${m.windSpeed.toFixed(1)} m/s`} />
-            <SnapCard icon={<Zap size={16} />} label="Power Output" value={formatPower(m.powerOutput)} colorClass="text-success" />
-            <SnapCard icon={<Activity size={16} />} label="Rotor Speed" value={`${m.rotorSpeed.toFixed(1)} rpm`} />
-            <SnapCard icon={<RotateCcw size={16} />} label="Blade Pitch" value={`${m.bladePitch.toFixed(1)}°`} />
-            <SnapCard icon={<Thermometer size={16} />} label="Generator Temp" value={`${m.generatorTemp.toFixed(1)}°C`} colorClass={m.generatorTemp > 75 ? 'text-warning' : undefined} />
-            <SnapCard icon={<Thermometer size={16} />} label="Gearbox Temp" value={`${m.gearboxTemp.toFixed(1)}°C`} colorClass={m.gearboxTemp > 75 ? 'text-warning' : undefined} />
-            <SnapCard icon={<Waves size={16} />} label="Vibration" value={m.vibration.toFixed(2)} colorClass={m.vibration > 8 ? 'text-warning' : undefined} />
-            <SnapCard icon={<Compass size={16} />} label="Wind Direction" value={`${m.windDirection.toFixed(0)}°`} />
+        {/* Controls accordion */}
+        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${controlsOpen ? 'max-h-[600px] mb-5' : 'max-h-0'}`}>
+          <div className="bg-card border border-edge rounded-[10px] p-5">
+            <TurbineControls
+              turbineId={turbine.id}
+              turbineStatus={turbine.status}
+              onCommandSent={refreshCommands}
+            />
           </div>
-        )}
+        </div>
 
         {/* Tabs */}
         <div className="flex border-b border-edge mb-5">
@@ -218,18 +248,32 @@ export default function TurbineDetailPage() {
 
         {/* Tab content */}
         {activeTab === 'metrics' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {METRIC_CHARTS.map(cfg => (
-              <div key={cfg.key} className="bg-card border border-edge rounded-[10px] px-5 py-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: cfg.color }} />
-                  <h4 className="font-semibold text-ink">{cfg.label}</h4>
-                  <span className="ml-auto text-xs text-faint">{cfg.unit}</span>
-                </div>
-                <MetricsChart metrics={metrics} config={cfg} height={160} />
+          <>
+            {m && (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+                <SnapCard icon={<Wind size={16} />} label="Wind Speed" value={`${m.windSpeed.toFixed(1)} m/s`} />
+                <SnapCard icon={<Zap size={16} />} label="Power Output" value={formatPower(m.powerOutput)} colorClass="text-success" />
+                <SnapCard icon={<Activity size={16} />} label="Rotor Speed" value={`${m.rotorSpeed.toFixed(1)} rpm`} />
+                <SnapCard icon={<RotateCcw size={16} />} label="Blade Pitch" value={`${m.bladePitch.toFixed(1)}°`} />
+                <SnapCard icon={<Thermometer size={16} />} label="Generator Temp" value={`${m.generatorTemp.toFixed(1)}°C`} colorClass={m.generatorTemp > 75 ? 'text-warning' : undefined} />
+                <SnapCard icon={<Thermometer size={16} />} label="Gearbox Temp" value={`${m.gearboxTemp.toFixed(1)}°C`} colorClass={m.gearboxTemp > 75 ? 'text-warning' : undefined} />
+                <SnapCard icon={<Waves size={16} />} label="Vibration" value={m.vibration.toFixed(2)} colorClass={m.vibration > 8 ? 'text-warning' : undefined} />
+                <SnapCard icon={<Compass size={16} />} label="Wind Direction" value={`${m.windDirection.toFixed(0)}°`} />
               </div>
-            ))}
-          </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {METRIC_CHARTS.map(cfg => (
+                <div key={cfg.key} className="bg-card border border-edge rounded-[10px] px-5 py-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: cfg.color }} />
+                    <h4 className="font-semibold text-ink">{cfg.label}</h4>
+                    <span className="ml-auto text-xs text-faint">{cfg.unit}</span>
+                  </div>
+                  <MetricsChart metrics={metrics} config={cfg} height={160} />
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
         {activeTab === 'alerts' && (
@@ -244,17 +288,8 @@ export default function TurbineDetailPage() {
           </div>
         )}
 
-        {activeTab === 'controls' && (
-          <div className="max-w-[500px]">
-            <div className="bg-card border border-edge rounded-[10px] p-5">
-              <h3 className="font-semibold text-ink mb-5">Turbine Controls</h3>
-              <TurbineControls
-                turbineId={turbine.id}
-                turbineStatus={turbine.status}
-                onCommandSent={refreshCommands}
-              />
-            </div>
-          </div>
+        {activeTab === 'data-history' && (
+          <MetricsHistoryTab turbineId={turbine.id} />
         )}
 
         {activeTab === 'history' && (

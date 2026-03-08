@@ -1,0 +1,25 @@
+name: Check useEffect Dependencies
+
+on:
+  push:
+    paths:
+      - 'client/src/**'
+  pull_request:
+    paths:
+      - 'client/src/**'
+
+jobs:
+  check-hooks:
+    name: useEffect dependency check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Run useEffect dependency check
+        run: node scripts/check-useeffect-deps.js
+        working-directory: client

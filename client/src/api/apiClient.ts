@@ -97,10 +97,29 @@ export interface TurbineCommand {
   timestamp: string;
 }
 
+export interface MetricHistoryPoint {
+  period: string;
+  windSpeed: number;
+  powerOutput: number;
+  rotorSpeed: number;
+  bladePitch: number;
+  generatorTemp: number;
+  gearboxTemp: number;
+  vibration: number;
+  ambientTemperature: number;
+  dataPoints: number;
+}
+
 export interface TurbineStatusDto {
   turbine: WindTurbine;
   latestMetric: TurbineMetric | null;
 }
+
+// ─── Info API ────────────────────────────────────────────────────────────────
+
+export const farmApi = {
+  get: () => apiGet<{ farmId: string }>('/api/farm'),
+};
 
 // ─── Auth API ────────────────────────────────────────────────────────────────
 
@@ -119,6 +138,12 @@ export const turbinesApi = {
   getMetrics: (id: string, limit = 50) =>
     apiGet<TurbineMetric[]>(`/api/turbines/${id}/metrics?limit=${limit}`),
   getCommands: (id: string) => apiGet<TurbineCommand[]>(`/api/turbines/${id}/commands`),
+  getMetricsHistory: (id: string, from?: string, to?: string, granularity = 'day') => {
+    const params = new URLSearchParams({ granularity });
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    return apiGet<MetricHistoryPoint[]>(`/api/turbines/${id}/metrics/history?${params}`);
+  },
   sendCommand: (id: string, action: string, params?: Record<string, unknown>) =>
     apiPost<TurbineCommand>(`/api/turbines/${id}/commands`, { action, ...params }),
 };
@@ -129,6 +154,7 @@ export const alertsApi = {
   getAll: (includeAcknowledged = false) =>
     apiGet<TurbineAlert[]>(`/api/alerts?includeAcknowledged=${includeAcknowledged}`),
   acknowledge: (id: string) => apiPatch<TurbineAlert>(`/api/alerts/${id}/acknowledge`),
+  triggerTest: (turbineId: string) => apiPost<TurbineAlert>(`/api/alerts/test?turbineId=${turbineId}`),
 };
 
 // ─── Realtime API (SSE subscriptions) ───────────────────────────────────────
