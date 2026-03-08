@@ -95,7 +95,7 @@ export default function TurbineCard({ data }: Props) {
           </p>
         </div>
         <div className="w-10 h-10 bg-accent/15 border border-accent/20 rounded-[10px] flex items-center justify-center shrink-0">
-          <Wind size={20} color="#38bdf8" />
+          <span className="text-accent font-bold text-[1.1rem]">{turbine.name.charAt(0).toUpperCase()}</span>
         </div>
       </div>
 

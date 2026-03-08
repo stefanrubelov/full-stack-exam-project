@@ -109,14 +109,20 @@ public class TurbinesController(
     };
 
     [HttpGet("{id}/commands")]
-    public ActionResult<List<TurbineCommand>> GetCommands(string id)
+    public ActionResult GetCommands(string id, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-        var commands = db.TurbineCommands
-            .Where(c => c.TurbineId == id)
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        page = Math.Max(1, page);
+
+        var query = db.TurbineCommands.Where(c => c.TurbineId == id);
+        var total = query.Count();
+        var items = query
             .OrderByDescending(c => c.Timestamp)
-            .Take(50)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToList();
-        return Ok(commands);
+
+        return Ok(new { total, page, pageSize, items });
     }
 
     [HttpPost("{id}/commands")]

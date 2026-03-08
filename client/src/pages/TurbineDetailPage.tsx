@@ -7,9 +7,10 @@ import AlertsPanel from '../components/AlertsPanel';
 import TurbineControls, { CommandHistory } from '../components/TurbineControls';
 import MetricsHistoryTab from '../components/MetricsHistoryTab';
 import {
-  type TurbineMetric, type TurbineAlert, type TurbineCommand, type TurbineStatusDto,
+  type TurbineMetric, type TurbineAlert, type TurbineStatusDto, type CommandsPage,
   realtimeApi, turbinesApi, alertsApi,
 } from '../api/apiClient';
+import Pagination from '../components/Pagination';
 import { ArrowLeft, Wind, Zap, Thermometer, Activity, Compass, RotateCcw, Waves, AlertTriangle, Settings, ChevronDown } from 'lucide-react';
 
 const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
@@ -45,16 +46,18 @@ export default function TurbineDetailPage() {
   const [metrics, setMetrics] = useState<TurbineMetric[]>([]);
   const [alerts, setAlerts] = useState<TurbineAlert[]>([]);
   const [allAlerts, setAllAlerts] = useState<TurbineAlert[]>([]);
-  const [commands, setCommands] = useState<TurbineCommand[]>([]);
+  const [commandsPage, setCommandsPage] = useState<CommandsPage>({ total: 0, page: 1, pageSize: 20, items: [] });
+  const [commandsCurrentPage, setCommandsCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<'metrics' | 'alerts' | 'history' | 'data-history'>('metrics');
   const [controlsOpen, setControlsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const refreshCommands = useCallback(async () => {
+  const refreshCommands = useCallback(async (page = 1) => {
     if (!id) return;
     try {
-      const cmds = await turbinesApi.getCommands(id);
-      setCommands(cmds);
+      const result = await turbinesApi.getCommands(id, page, 20);
+      setCommandsPage(result);
+      setCommandsCurrentPage(page);
     } catch (e) {
       console.error(e);
     }
@@ -76,11 +79,11 @@ export default function TurbineDetailPage() {
       try {
         const [td, cmds, al] = await Promise.all([
           turbinesApi.getById(id),
-          turbinesApi.getCommands(id),
+          turbinesApi.getCommands(id, 1, 20),
           alertsApi.getAll(),
         ]);
         setTurbineData(td);
-        setCommands(cmds);
+        setCommandsPage(cmds);
         setAllAlerts(al);
         setAlerts(al.filter(a => a.turbineId === id));
       } catch (e) {
@@ -200,7 +203,7 @@ export default function TurbineDetailPage() {
                 </span>
               </div>
               <p className="text-faint text-[0.8rem]">
-                Turbine ID: {turbine.id.substring(0, 12)}…
+                Turbine ID: {turbine.id}
               </p>
             </div>
           </div>
@@ -224,7 +227,7 @@ export default function TurbineDetailPage() {
             <TurbineControls
               turbineId={turbine.id}
               turbineStatus={turbine.status}
-              onCommandSent={refreshCommands}
+              onCommandSent={() => refreshCommands(1)}
             />
           </div>
         </div>
@@ -295,7 +298,19 @@ export default function TurbineDetailPage() {
         {activeTab === 'history' && (
           <div className="bg-card border border-edge rounded-[10px] p-5">
             <h3 className="font-semibold text-ink mb-4">Command History</h3>
-            <CommandHistory commands={commands} />
+            <CommandHistory commands={commandsPage.items} />
+            {commandsPage.total > 0 && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-edge">
+                <p className="text-[0.75rem] text-faint">
+                  {commandsPage.total.toLocaleString()} command{commandsPage.total !== 1 ? 's' : ''} · page {commandsCurrentPage} of {Math.ceil(commandsPage.total / 20)}
+                </p>
+                <Pagination
+                  page={commandsCurrentPage}
+                  totalPages={Math.ceil(commandsPage.total / 20)}
+                  onPageChange={refreshCommands}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
