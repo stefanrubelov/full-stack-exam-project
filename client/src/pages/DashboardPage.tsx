@@ -3,7 +3,8 @@ import { StateleSSEClient } from 'statele-sse';
 import Layout from '../components/Layout';
 import TurbineCard from '../components/TurbineCard';
 import AlertsPanel from '../components/AlertsPanel';
-import { type TurbineStatusDto, type TurbineAlert, realtimeApi, farmApi } from '../api/apiClient';
+import { type TurbineStatusDto, type TurbineAlert, realtimeApi, farmApi, turbinesApi } from '../api/apiClient';
+import { TurbineStatus } from '../generated-ts-client';
 import { Wind, Activity, Zap, Bell } from 'lucide-react';
 
 const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
@@ -28,6 +29,13 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      turbinesApi.getAll().then(setTurbines).catch(() => {});
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
 
     const unsubTurbines = sse.listen(
@@ -47,8 +55,8 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const running = turbines.filter(t => t.turbine.status === 'running').length;
-  const stopped = turbines.filter(t => t.turbine.status === 'stopped').length;
+  const running = turbines.filter(t => t.turbine.status === TurbineStatus.Running).length;
+  const stopped = turbines.filter(t => t.turbine.status === TurbineStatus.Stopped).length;
   const totalPower = turbines.reduce((acc, t) => acc + (t.latestMetric?.powerOutput ?? 0), 0);
 
   const formatPower = (w: number) => {

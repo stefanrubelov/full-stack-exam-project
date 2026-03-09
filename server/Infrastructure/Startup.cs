@@ -137,6 +137,8 @@ public class Startup
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ITokenService, JwtService>();
 
+        services.AddSingleton<Features.AlertThresholds.AlertThresholdCache>();
+
         services.AddMqttControllers();
 
         services.AddControllers().AddJsonOptions(options =>
@@ -144,6 +146,7 @@ public class Startup
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
         });
 
         services.AddCors();

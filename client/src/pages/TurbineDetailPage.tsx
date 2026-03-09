@@ -11,6 +11,7 @@ import {
   realtimeApi, turbinesApi, alertsApi,
 } from '../api/apiClient';
 import Pagination from '../components/Pagination';
+import { TurbineStatus } from '../generated-ts-client';
 import { ArrowLeft, Wind, Zap, Thermometer, Activity, Compass, RotateCcw, Waves, AlertTriangle, Settings, ChevronDown } from 'lucide-react';
 
 const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
@@ -27,8 +28,8 @@ const METRIC_CHARTS: MetricConfig[] = [
 ];
 
 function statusBadgeClass(s: string) {
-  if (s === 'running') return 'bg-success/[12%] text-success';
-  if (s === 'stopped') return 'bg-muted/15 text-muted';
+  if (s === TurbineStatus.Running) return 'bg-success/[12%] text-success';
+  if (s === TurbineStatus.Stopped) return 'bg-muted/15 text-muted';
   return 'bg-warning/[12%] text-warning';
 }
 
@@ -228,6 +229,8 @@ export default function TurbineDetailPage() {
               turbineId={turbine.id}
               turbineStatus={turbine.status}
               onCommandSent={() => refreshCommands(1)}
+              initialBladePitch={m?.bladePitch}
+              initialTelemetryInterval={turbine.telemetryIntervalSeconds}
             />
           </div>
         </div>

@@ -12,6 +12,11 @@ import DashboardPage from './pages/DashboardPage';
 import TurbineDetailPage from './pages/TurbineDetailPage';
 import AlertsPage from './pages/AlertsPage';
 import CommandLogsPage from './pages/CommandLogsPage';
+import UsersPage from './pages/UsersPage';
+import AlertThresholdsPage from './pages/AlertThresholdsPage';
+import MaintenancePage from './pages/MaintenancePage';
+import ProfilePage from './pages/ProfilePage';
+import MultipleTabsOverlay from './components/MultipleTabsOverlay';
 
 const alertSse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
 
@@ -83,6 +88,10 @@ function AppRoutes() {
       <Route path="/turbines/:id" element={<PrivateRoute><TurbineDetailPage /></PrivateRoute>} />
       <Route path="/alerts" element={<PrivateRoute><AlertsPage /></PrivateRoute>} />
       <Route path="/command-logs" element={<PrivateRoute><CommandLogsPage /></PrivateRoute>} />
+      <Route path="/users" element={<PrivateRoute><UsersPage /></PrivateRoute>} />
+      <Route path="/alert-thresholds" element={<PrivateRoute><AlertThresholdsPage /></PrivateRoute>} />
+      <Route path="/maintenance" element={<PrivateRoute><MaintenancePage /></PrivateRoute>} />
+      <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
@@ -92,6 +101,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <MultipleTabsOverlay />
         <AlertToastListener />
         <AppRoutes />
         <Toaster

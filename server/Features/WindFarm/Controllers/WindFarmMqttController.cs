@@ -1,12 +1,15 @@
 using Mqtt.Controllers;
 using server.Entities;
+using server.Features.AlertThresholds;
 using server.Features.WindFarm.Models;
+using TurbineStatus = server.Entities.TurbineStatus;
 
 namespace server.Features.WindFarm.Controllers;
 
 public class WindFarmMqttController(
     MyDbContext db,
     ConnectionStrings connectionStrings,
+    AlertThresholdCache thresholdCache,
     ILogger<WindFarmMqttController> logger) : MqttController
 {
     [MqttRoute("farm/+/windmill/{turbineId}/telemetry")]
@@ -29,7 +32,7 @@ public class WindFarmMqttController(
                 Id = telemetry.TurbineId,
                 Name = telemetry.TurbineName,
                 FarmId = telemetry.FarmId,
-                Status = telemetry.Status,
+                Status = Enum.TryParse<TurbineStatus>(telemetry.Status, ignoreCase: true, out var s) ? s : TurbineStatus.Unknown,
                 LastSeen = telemetry.Timestamp.ToUniversalTime()
             };
             db.WindTurbines.Add(turbine);
@@ -93,17 +96,22 @@ public class WindFarmMqttController(
 
     private void GenerateThresholdAlerts(TurbineTelemetry telemetry)
     {
-        if (telemetry.WindSpeed > 25)
-            AddAlert(telemetry, "critical", $"High wind speed: {telemetry.WindSpeed:F1} m/s (threshold: 25 m/s)");
+        var thresholds = thresholdCache.GetEnabled(db);
 
-        if (telemetry.Vibration > 10)
-            AddAlert(telemetry, "warning", $"High vibration: {telemetry.Vibration:F2} (threshold: 10)");
+        var metricValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "windSpeed", telemetry.WindSpeed },
+            { "vibration", telemetry.Vibration },
+            { "generatorTemp", telemetry.GeneratorTemp },
+            { "gearboxTemp", telemetry.GearboxTemp }
+        };
 
-        if (telemetry.GeneratorTemp > 80)
-            AddAlert(telemetry, "warning", $"Generator overheating: {telemetry.GeneratorTemp:F1}°C (threshold: 80°C)");
-
-        if (telemetry.GearboxTemp > 80)
-            AddAlert(telemetry, "warning", $"Gearbox overheating: {telemetry.GearboxTemp:F1}°C (threshold: 80°C)");
+        foreach (var threshold in thresholds)
+        {
+            if (!metricValues.TryGetValue(threshold.MetricName, out var metricValue)) continue;
+            if (metricValue > threshold.Value)
+                AddAlert(telemetry, threshold.Severity, $"{threshold.Description}: {metricValue:F2} (threshold: {threshold.Value})");
+        }
     }
 
     private void AddAlert(TurbineTelemetry telemetry, string severity, string message)

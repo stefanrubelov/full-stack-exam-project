@@ -1,4 +1,5 @@
 using server.Entities;
+using TurbineStatus = server.Entities.TurbineStatus;
 
 namespace server;
 
@@ -188,7 +189,7 @@ public class HistoricalDataSeeder(MyDbContext ctx, ILogger<HistoricalDataSeeder>
                     Id       = id,
                     Name     = name,
                     FarmId   = DevFarmId,
-                    Status   = "running",
+                    Status   = TurbineStatus.Running,
                     LastSeen = DateTime.UtcNow,
                 };
                 ctx.WindTurbines.Add(t);

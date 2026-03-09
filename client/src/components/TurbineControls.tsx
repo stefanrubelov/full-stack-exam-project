@@ -1,38 +1,34 @@
-import { useState } from 'react';
-import { type TurbineCommand, turbinesApi, alertsApi } from '../api/apiClient';
-import { Play, Square, Sliders, Clock, History, Send, FlaskConical } from 'lucide-react';
+import { useState, useRef } from 'react';
+import toast from 'react-hot-toast';
+import { type TurbineCommand, alertsApi } from '../api/apiClient';
+import { TurbineAction, TurbineStatus } from '../generated-ts-client';
+import { useTurbineCommand } from '../hooks/useTurbineCommand';
+import { Play, Square, Sliders, Clock, History, Send, FlaskConical, Wrench } from 'lucide-react';
 
 interface Props {
   turbineId: string;
-  turbineStatus: string;
+  turbineStatus: TurbineStatus;
   onCommandSent: () => void;
+  initialBladePitch?: number;
+  initialTelemetryInterval?: number;
 }
 
 const sectionLabel = 'text-dim text-[0.72rem] uppercase tracking-[0.8px] mb-2.5 font-semibold';
-const inputClass = 'w-full bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[9px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(56,189,248,0.15)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans';
+const inputClass = 'w-full bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[9px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(56,189,248,0.15)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans disabled:opacity-50 disabled:cursor-not-allowed';
 
 function Spinner() {
   return <span className="inline-block w-3 h-3 rounded-full border-[1.5px] border-edge border-t-accent animate-spin shrink-0" />;
 }
 
-export default function TurbineControls({ turbineId, turbineStatus, onCommandSent }: Props) {
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error, setError] = useState('');
-  const [pitchAngle, setPitchAngle] = useState('15');
-  const [intervalSec, setIntervalSec] = useState('10');
+export default function TurbineControls({ turbineId, turbineStatus, onCommandSent, initialBladePitch, initialTelemetryInterval }: Props) {
+  const [pitchValue, setPitchValue] = useState(() => initialBladePitch?.toFixed(0) ?? '15');
+  const [intervalValue, setIntervalValue] = useState(() => initialTelemetryInterval?.toString() ?? '10');
+  const initialPitch = useRef(initialBladePitch?.toFixed(0) ?? '15');
+  const initialInterval = useRef(initialTelemetryInterval?.toString() ?? '10');
+  const { loading, error, setError, send: sendCmd } = useTurbineCommand(turbineId);
 
-  const send = async (action: string, params?: Record<string, unknown>) => {
-    setError('');
-    setLoading(action);
-    try {
-      await turbinesApi.sendCommand(turbineId, action, params);
-      onCommandSent();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Command failed');
-    } finally {
-      setLoading(null);
-    }
-  };
+  const send = (action: TurbineAction, params?: Record<string, unknown>, successMsg?: string) =>
+    sendCmd(action, params, () => { onCommandSent(); if (successMsg) toast.success(successMsg); });
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,22 +41,30 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
       {/* Power controls */}
       <div>
         <h4 className={sectionLabel}>Power Control</h4>
-        <div className="flex gap-6">
+        <div className="flex gap-2">
           <button
-            onClick={() => send('start')}
-            disabled={!!loading || turbineStatus === 'running'}
+            onClick={() => send(TurbineAction.Start, undefined, 'Turbine started')}
+            disabled={!!loading || turbineStatus === TurbineStatus.Running}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-success/[12%] text-success border-success/30 hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading === 'start' ? <Spinner /> : <Play size={13} />}
+            {loading === TurbineAction.Start ? <Spinner /> : <Play size={13} />}
             Start
           </button>
           <button
-            onClick={() => send('stop', { reason: 'Manual stop by operator' })}
-            disabled={!!loading || turbineStatus === 'stopped'}
+            onClick={() => send(TurbineAction.Stop, { reason: 'Manual stop by operator' }, 'Turbine stopped')}
+            disabled={!!loading || turbineStatus === TurbineStatus.Stopped}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-danger/[12%] text-danger border-danger/30 hover:bg-danger/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading === 'stop' ? <Spinner /> : <Square size={13} />}
+            {loading === TurbineAction.Stop ? <Spinner /> : <Square size={13} />}
             Stop
+          </button>
+          <button
+            onClick={() => send(TurbineAction.Stop, { reason: 'Turbine taken offline for scheduled maintenance' }, 'Turbine taken offline for maintenance')}
+            disabled={!!loading || turbineStatus === TurbineStatus.Stopped}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-warning/[12%] text-warning border-warning/30 hover:bg-warning/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading === TurbineAction.Stop ? <Spinner /> : <Wrench size={13} />}
+            Maintenance
           </button>
         </div>
       </div>
@@ -73,26 +77,27 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
             <div className="flex-1">
               <input
                 type="number"
-                value={pitchAngle}
-                onChange={e => setPitchAngle(e.target.value)}
+                value={pitchValue}
+                onChange={e => setPitchValue(e.target.value)}
                 min="0"
                 max="30"
                 step="1"
                 placeholder="0–30°"
+                disabled={!!loading || turbineStatus !== TurbineStatus.Running}
                 className={inputClass}
               />
               <div className="text-[0.7rem] text-faint mt-1">Range: 0° to 30°</div>
             </div>
             <button
               onClick={() => {
-                const a = parseFloat(pitchAngle);
+                const a = parseFloat(pitchValue);
                 if (isNaN(a) || a < 0 || a > 30) { setError('Pitch angle must be 0–30°'); return; }
-                send('setPitch', { angle: a });
+                send(TurbineAction.SetPitch, { angle: a }, `Blade pitch set to ${a}°`);
               }}
-              disabled={!!loading}
+              disabled={!!loading || turbineStatus !== TurbineStatus.Running || pitchValue === initialPitch.current}
               className="shrink-0 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading === 'setPitch' ? <Spinner /> : <Sliders size={13} />}
+              {loading === TurbineAction.SetPitch ? <Spinner /> : <Sliders size={13} />}
               Set
             </button>
           </div>
@@ -106,26 +111,27 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
             <div className="flex-1">
               <input
                 type="number"
-                value={intervalSec}
-                onChange={e => setIntervalSec(e.target.value)}
+                value={intervalValue}
+                onChange={e => setIntervalValue(e.target.value)}
                 min="1"
                 max="60"
                 step="1"
                 placeholder="1–60 s"
+                disabled={!!loading || turbineStatus !== TurbineStatus.Running}
                 className={inputClass}
               />
               <div className="text-[0.7rem] text-faint mt-1">Range: 1–60 seconds</div>
             </div>
             <button
               onClick={() => {
-                const v = parseInt(intervalSec);
+                const v = parseInt(intervalValue);
                 if (isNaN(v) || v < 1 || v > 60) { setError('Interval must be 1–60 seconds'); return; }
-                send('setInterval', { value: v });
+                send(TurbineAction.SetInterval, { value: v }, `Telemetry interval set to ${v}s`);
               }}
-              disabled={!!loading}
+              disabled={!!loading || turbineStatus !== TurbineStatus.Running || intervalValue === initialInterval.current}
               className="shrink-0 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading === 'setInterval' ? <Spinner /> : <Clock size={13} />}
+              {loading === TurbineAction.SetInterval ? <Spinner /> : <Clock size={13} />}
               Set
             </button>
           </div>

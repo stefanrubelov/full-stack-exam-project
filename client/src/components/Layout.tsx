@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
-import { LayoutDashboard, Wind, Bell, LogOut, User, Terminal } from 'lucide-react';
+import { LayoutDashboard, Wind, Bell, LogOut, User, Terminal, Users, ShieldAlert, Wrench } from 'lucide-react';
 
 interface Props {
   alertCount?: number;
@@ -62,11 +62,31 @@ export default function Layout({ children, alertCount = 0 }: Props) {
             <Terminal size={17} />
             Command Logs
           </NavLink>
+          <NavLink to="/maintenance" className={navLinkClass}>
+            <Wrench size={17} />
+            Maintenance
+          </NavLink>
+
+          <div className="px-4 pb-2 pt-4 text-[0.7rem] text-faint uppercase tracking-[0.8px]">
+            Admin
+          </div>
+
+          <NavLink to="/users" className={navLinkClass}>
+            <Users size={17} />
+            Users
+          </NavLink>
+
+          <NavLink to="/alert-thresholds" className={navLinkClass}>
+            <ShieldAlert size={17} />
+            Alert Thresholds
+          </NavLink>
         </div>
 
         {/* User section */}
         <div className="p-2 border-t border-edge">
-          <div className="flex items-center gap-2.5 px-4 py-2.5 opacity-80 cursor-default">
+          <NavLink to="/profile" className={({ isActive }) =>
+            `flex items-center gap-2.5 px-4 py-2.5 rounded-md no-underline transition-all duration-150 mx-0 ${isActive ? 'bg-accent/15' : 'hover:bg-lift'}`
+          }>
             <div className="w-7 h-7 rounded-full bg-accent/15 border border-accent flex items-center justify-center shrink-0">
               <User size={14} color="#38bdf8" />
             </div>
@@ -78,7 +98,7 @@ export default function Layout({ children, alertCount = 0 }: Props) {
                 {user?.email}
               </div>
             </div>
-          </div>
+          </NavLink>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2.5 w-full px-4 py-2.5 rounded-md text-sm font-medium text-dim bg-transparent border-none cursor-pointer transition-all duration-150 hover:bg-danger/[12%] hover:text-danger mt-1"

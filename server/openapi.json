@@ -111,6 +111,43 @@
         }
       }
     },
+    "/api/auth/profile": {
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Auth_UpdateProfile",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/Farm": {
       "get": {
         "tags": [
@@ -130,6 +167,63 @@
             }
           }
         }
+      }
+    },
+    "/api/Users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_GetAll",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/Commands": {
@@ -643,6 +737,63 @@
         }
       }
     },
+    "/api/Maintenance": {
+      "get": {
+        "tags": [
+          "Maintenance"
+        ],
+        "operationId": "Maintenance_GetAll",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          },
+          {
+            "name": "turbineId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/Health": {
       "get": {
         "tags": [
@@ -683,6 +834,82 @@
             }
           }
         }
+      }
+    },
+    "/api/alert-thresholds": {
+      "get": {
+        "tags": [
+          "AlertThresholds"
+        ],
+        "operationId": "AlertThresholds_GetAll",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/alert-thresholds/{id}": {
+      "put": {
+        "tags": [
+          "AlertThresholds"
+        ],
+        "operationId": "AlertThresholds_Update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateThresholdRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
       }
     },
     "/api/Alerts/test": {
@@ -892,6 +1119,24 @@
           }
         }
       },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "TurbineStatusDto": {
         "type": "object",
         "additionalProperties": false,
@@ -923,13 +1168,31 @@
             "type": "string"
           },
           "status": {
-            "type": "string"
+            "$ref": "#/components/schemas/TurbineStatus"
           },
           "lastSeen": {
             "type": "string",
             "format": "date-time"
+          },
+          "telemetryIntervalSeconds": {
+            "type": "integer",
+            "format": "int32"
           }
         }
+      },
+      "TurbineStatus": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Running",
+          "Stopped",
+          "Unknown"
+        ],
+        "enum": [
+          "running",
+          "stopped",
+          "unknown"
+        ]
       },
       "TurbineMetric": {
         "type": "object",
@@ -1078,7 +1341,7 @@
         "additionalProperties": false,
         "properties": {
           "action": {
-            "type": "string"
+            "$ref": "#/components/schemas/TurbineAction"
           },
           "value": {
             "type": "number",
@@ -1095,6 +1358,22 @@
             "nullable": true
           }
         }
+      },
+      "TurbineAction": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Start",
+          "Stop",
+          "SetPitch",
+          "SetInterval"
+        ],
+        "enum": [
+          "start",
+          "stop",
+          "setPitch",
+          "setInterval"
+        ]
       },
       "RealtimeListenResponseOfListOfMeasurement": {
         "allOf": [
@@ -1264,6 +1543,25 @@
             }
           }
         ]
+      },
+      "UpdateThresholdRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
       }
     },
     "securitySchemes": {
