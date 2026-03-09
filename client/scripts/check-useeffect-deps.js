@@ -55,19 +55,56 @@ function hasDepArray(content, openParenIndex) {
   return false;
 }
 
+/**
+ * Strips // line comments without touching string contents or /* blocks.
+ * Replaces each comment with spaces so line numbers are preserved.
+ */
+function stripLineComments(content) {
+  let result = '';
+  let i = 0;
+  while (i < content.length) {
+    const ch = content[i];
+    // String literal — skip entirely
+    if (ch === '"' || ch === "'" || ch === '`') {
+      const quote = ch;
+      result += ch;
+      i++;
+      while (i < content.length && content[i] !== quote) {
+        if (content[i] === '\\') { result += content[i]; i++; }
+        result += content[i];
+        i++;
+      }
+      if (i < content.length) { result += content[i]; i++; }
+      continue;
+    }
+    // Line comment — replace with spaces until newline
+    if (ch === '/' && content[i + 1] === '/') {
+      while (i < content.length && content[i] !== '\n') {
+        result += ' ';
+        i++;
+      }
+      continue;
+    }
+    result += ch;
+    i++;
+  }
+  return result;
+}
+
 function findViolations(content, filePath) {
+  const stripped = stripLineComments(content);
   const violations = [];
   const hook = 'useEffect(';
   let pos = 0;
 
   while (true) {
-    const idx = content.indexOf(hook, pos);
+    const idx = stripped.indexOf(hook, pos);
     if (idx === -1) break;
 
     const openParen = idx + hook.length - 1; // index of '('
     const line = content.substring(0, idx).split('\n').length;
 
-    if (!hasDepArray(content, openParen)) {
+    if (!hasDepArray(stripped, openParen)) {
       violations.push(`  ${filePath}:${line}`);
     }
 

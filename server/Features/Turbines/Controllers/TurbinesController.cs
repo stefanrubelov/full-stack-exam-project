@@ -131,13 +131,10 @@ public class TurbinesController(
         var turbine = db.WindTurbines.Find(id);
         if (turbine == null) throw new NotFoundError("Turbine", id);
 
-        if (!IsValidAction(request.Action))
-            return BadRequest(new { error = $"Unknown action '{request.Action}'. Valid: setInterval, stop, start, setPitch" });
-
-        if (request.Action == "setInterval" && (request.Value == null || request.Value < 1 || request.Value > 60))
+        if (request.Action == TurbineAction.SetInterval && (request.Value == null || request.Value < 1 || request.Value > 60))
             return BadRequest(new { error = "setInterval requires 'value' between 1 and 60" });
 
-        if (request.Action == "setPitch" && (request.Angle == null || request.Angle < 0 || request.Angle > 30))
+        if (request.Action == TurbineAction.SetPitch && (request.Angle == null || request.Angle < 0 || request.Angle > 30))
             return BadRequest(new { error = "setPitch requires 'angle' between 0 and 30 degrees" });
 
         var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -149,10 +146,16 @@ public class TurbinesController(
 
         await mqttClient.PublishAsync(topic, payloadJson);
 
-        if (request.Action is "stop" or "start")
+        if (request.Action is TurbineAction.Stop or TurbineAction.Start)
         {
-            turbine.Status = request.Action == "stop" ? "stopped" : "running";
+            turbine.Status = request.Action == TurbineAction.Stop ? TurbineStatus.Stopped : TurbineStatus.Running;
             turbine.LastSeen = DateTime.UtcNow;
+            db.WindTurbines.Update(turbine);
+        }
+
+        if (request.Action == TurbineAction.SetInterval && request.Value.HasValue)
+        {
+            turbine.TelemetryIntervalSeconds = (int)request.Value.Value;
             db.WindTurbines.Update(turbine);
         }
 
@@ -163,7 +166,7 @@ public class TurbinesController(
             FarmId = turbine.FarmId,
             UserId = userId,
             UserName = userName,
-            Action = request.Action,
+            Action = request.Action.ToString(),
             Payload = payloadJson,
             Timestamp = DateTime.UtcNow
         };
@@ -175,15 +178,12 @@ public class TurbinesController(
         return Ok(cmd);
     }
 
-    private static bool IsValidAction(string action) =>
-        action is "setInterval" or "stop" or "start" or "setPitch";
-
     private static object BuildMqttPayload(SendCommandRequest r) => r.Action switch
     {
-        "setInterval" => new { action = "setInterval", value = r.Value },
-        "stop" => new { action = "stop", reason = r.Reason ?? "" },
-        "start" => new { action = "start" },
-        "setPitch" => new { action = "setPitch", angle = r.Angle },
-        _ => new { action = r.Action }
+        TurbineAction.SetInterval => new { action = "setInterval", value = r.Value },
+        TurbineAction.Stop        => new { action = "stop", reason = r.Reason ?? "" },
+        TurbineAction.Start       => new { action = "start" },
+        TurbineAction.SetPitch    => new { action = "setPitch", angle = r.Angle },
+        _                         => new { action = r.Action.ToString() }
     };
 }

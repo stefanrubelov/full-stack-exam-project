@@ -8,6 +8,14 @@ public class MyDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema("iot_weatherstation");
+
+        modelBuilder.Entity<Entities.WindTurbine>()
+            .Property(t => t.Status)
+            .HasConversion(
+                v => v.ToString().ToLower(),
+                v => v == "running" ? Entities.TurbineStatus.Running
+                   : v == "stopped" ? Entities.TurbineStatus.Stopped
+                   : Entities.TurbineStatus.Unknown);
     }
 
     public MyDbContext(DbContextOptions<MyDbContext> options)
@@ -24,6 +32,7 @@ public class MyDbContext : DbContext
     public DbSet<TurbineMetric> TurbineMetrics { get; set; }
     public DbSet<TurbineAlert> TurbineAlerts { get; set; }
     public DbSet<TurbineCommand> TurbineCommands { get; set; }
+    public DbSet<AlertThreshold> AlertThresholds { get; set; }
 }
 
 [PrimaryKey(nameof(Id))]
