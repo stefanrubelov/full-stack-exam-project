@@ -1230,11 +1230,7 @@ export interface WindTurbine {
     telemetryIntervalSeconds?: number;
 }
 
-export enum TurbineStatus {
-    Running = "running",
-    Stopped = "stopped",
-    Unknown = "unknown",
-}
+export type TurbineStatus = "running" | "stopped" | "unknown";
 
 export interface TurbineMetric {
     id?: string;
@@ -1285,12 +1281,7 @@ export interface SendCommandRequest {
     reason?: string | undefined;
 }
 
-export enum TurbineAction {
-    Start = "start",
-    Stop = "stop",
-    SetPitch = "setPitch",
-    SetInterval = "setInterval",
-}
+export type TurbineAction = "start" | "stop" | "setPitch" | "setInterval";
 
 /** Returned by subscribe endpoints so the client knows which SSE group to listen on. */
 export interface RealtimeListenResponse {

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { turbinesApi } from '../api/apiClient';
-import { TurbineAction } from '../generated-ts-client';
+import { type TurbineAction } from '../generated-ts-client';
 
 export function useTurbineCommand(turbineId: string) {
   const [loading, setLoading] = useState<string | null>(null);

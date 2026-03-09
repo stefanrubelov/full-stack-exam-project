@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import TurbineCard from '../components/TurbineCard';
 import AlertsPanel from '../components/AlertsPanel';
 import { type TurbineStatusDto, type TurbineAlert, realtimeApi, farmApi, turbinesApi } from '../api/apiClient';
-import { TurbineStatus } from '../generated-ts-client';
+import { TurbineStatus } from '../enums';
 import { Wind, Activity, Zap, Bell } from 'lucide-react';
 
 const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);

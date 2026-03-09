@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { type TurbineCommand, alertsApi } from '../api/apiClient';
-import { TurbineAction, TurbineStatus } from '../generated-ts-client';
+import { TurbineAction, TurbineStatus } from '../enums';
 import { useTurbineCommand } from '../hooks/useTurbineCommand';
 import { Play, Square, Sliders, Clock, History, Send, FlaskConical, Wrench } from 'lucide-react';
 
@@ -43,27 +43,27 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
         <h4 className={sectionLabel}>Power Control</h4>
         <div className="flex gap-2">
           <button
-            onClick={() => send(TurbineAction.Start, undefined, 'Turbine started')}
+            onClick={() => send('start', undefined, 'Turbine started')}
             disabled={!!loading || turbineStatus === TurbineStatus.Running}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-success/[12%] text-success border-success/30 hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading === TurbineAction.Start ? <Spinner /> : <Play size={13} />}
+            {loading === 'start' ? <Spinner /> : <Play size={13} />}
             Start
           </button>
           <button
-            onClick={() => send(TurbineAction.Stop, { reason: 'Manual stop by operator' }, 'Turbine stopped')}
+            onClick={() => send('stop', { reason: 'Manual stop by operator' }, 'Turbine stopped')}
             disabled={!!loading || turbineStatus === TurbineStatus.Stopped}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-danger/[12%] text-danger border-danger/30 hover:bg-danger/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading === TurbineAction.Stop ? <Spinner /> : <Square size={13} />}
+            {loading === 'stop' ? <Spinner /> : <Square size={13} />}
             Stop
           </button>
           <button
-            onClick={() => send(TurbineAction.Stop, { reason: 'Turbine taken offline for scheduled maintenance' }, 'Turbine taken offline for maintenance')}
+            onClick={() => send('stop', { reason: 'Turbine taken offline for scheduled maintenance' }, 'Turbine taken offline for maintenance')}
             disabled={!!loading || turbineStatus === TurbineStatus.Stopped}
             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-warning/[12%] text-warning border-warning/30 hover:bg-warning/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading === TurbineAction.Stop ? <Spinner /> : <Wrench size={13} />}
+            {loading === 'stop' ? <Spinner /> : <Wrench size={13} />}
             Maintenance
           </button>
         </div>
@@ -92,12 +92,12 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
               onClick={() => {
                 const a = parseFloat(pitchValue);
                 if (isNaN(a) || a < 0 || a > 30) { setError('Pitch angle must be 0–30°'); return; }
-                send(TurbineAction.SetPitch, { angle: a }, `Blade pitch set to ${a}°`);
+                send('setPitch', { angle: a }, `Blade pitch set to ${a}°`);
               }}
               disabled={!!loading || turbineStatus !== TurbineStatus.Running || pitchValue === initialPitch.current}
               className="shrink-0 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading === TurbineAction.SetPitch ? <Spinner /> : <Sliders size={13} />}
+              {loading === 'setPitch' ? <Spinner /> : <Sliders size={13} />}
               Set
             </button>
           </div>
@@ -126,12 +126,12 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
               onClick={() => {
                 const v = parseInt(intervalValue);
                 if (isNaN(v) || v < 1 || v > 60) { setError('Interval must be 1–60 seconds'); return; }
-                send(TurbineAction.SetInterval, { value: v }, `Telemetry interval set to ${v}s`);
+                send('setInterval', { value: v }, `Telemetry interval set to ${v}s`);
               }}
               disabled={!!loading || turbineStatus !== TurbineStatus.Running || intervalValue === initialInterval.current}
               className="shrink-0 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading === TurbineAction.SetInterval ? <Spinner /> : <Clock size={13} />}
+              {loading === 'setInterval' ? <Spinner /> : <Clock size={13} />}
               Set
             </button>
           </div>

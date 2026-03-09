@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { type TurbineStatusDto } from '../api/apiClient';
-import { TurbineStatus } from '../generated-ts-client';
+import { TurbineStatus } from '../enums';
 import { ArrowRight } from 'lucide-react';
 
 interface Props {

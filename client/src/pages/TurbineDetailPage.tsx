@@ -11,7 +11,7 @@ import {
   realtimeApi, turbinesApi, alertsApi,
 } from '../api/apiClient';
 import Pagination from '../components/Pagination';
-import { TurbineStatus } from '../generated-ts-client';
+import { TurbineStatus } from '../enums';
 import { ArrowLeft, Wind, Zap, Thermometer, Activity, Compass, RotateCcw, Waves, AlertTriangle, Settings, ChevronDown } from 'lucide-react';
 
 const sse = new StateleSSEClient(`${import.meta.env.VITE_API_URL ?? 'http://localhost:5233'}/sse`);
@@ -227,7 +227,7 @@ export default function TurbineDetailPage() {
           <div className="bg-card border border-edge rounded-[10px] p-5">
             <TurbineControls
               turbineId={turbine.id}
-              turbineStatus={turbine.status}
+              turbineStatus={turbine.status as TurbineStatus}
               onCommandSent={() => refreshCommands(1)}
               initialBladePitch={m?.bladePitch}
               initialTelemetryInterval={turbine.telemetryIntervalSeconds}
