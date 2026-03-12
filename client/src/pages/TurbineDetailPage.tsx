@@ -181,7 +181,7 @@ export default function TurbineDetailPage() {
 
   return (
     <Layout alertCount={allAlerts.length}>
-      <div className="px-8 py-7 max-w-[1400px] w-full">
+      <div className="px-4 py-5 lg:px-8 lg:py-7 max-w-[1400px] w-full">
         {/* Back */}
         <button
           className="flex items-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light mb-5"
@@ -236,12 +236,12 @@ export default function TurbineDetailPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-edge mb-5">
+        <div className="flex border-b border-edge mb-5 overflow-x-auto overflow-y-hidden">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`bg-transparent border-none border-b-2 rounded-none px-5 py-2.5 text-sm cursor-pointer transition-all duration-150 -mb-px ${
+              className={`bg-transparent border-none border-b-2 rounded-none px-5 py-2.5 text-sm cursor-pointer transition-all duration-150 -mb-px whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-b-accent text-accent font-semibold'
                   : 'border-b-transparent text-dim font-normal hover:text-ink'
