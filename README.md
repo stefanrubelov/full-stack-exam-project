@@ -2,6 +2,15 @@
 
 A full-stack web application for real-time monitoring and control of offshore wind turbines. Displays live telemetry data, alerts, maintenance logs, and allows sending commands to turbines via MQTT.
 
+## Features
+
+- Live turbine telemetry via SSE (wind speed, power output, rotor speed, temperatures, etc.)
+- Alert system with configurable thresholds
+- Send commands to turbines (start, stop, set pitch, set interval)
+- Maintenance log
+- Command history
+- User management
+
 ## Tech Stack
 
 **Server** — .NET 10, ASP.NET Core, Entity Framework Core, PostgreSQL, MQTT (HiveMQ), Server-Sent Events (SSE), JWT authentication
@@ -41,11 +50,8 @@ Email:    test@test.com
 Password: password123
 ```
 
-## Features
+## Deployment
 
-- Live turbine telemetry via SSE (wind speed, power output, rotor speed, temperatures, etc.)
-- Alert system with configurable thresholds
-- Send commands to turbines (start, stop, set pitch, set interval)
-- Maintenance log
-- Command history
-- User management
+**Client** — Deployed to [Vercel](https://vercel.com). Automatically deployed on every push to `main` via the Vercel GitHub integration.
+
+**Server** — Deployed to [Fly.io](https://fly.io). Automatically deployed on every push to `main` via a GitHub Actions workflow.
