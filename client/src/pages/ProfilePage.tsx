@@ -51,7 +51,7 @@ export default function ProfilePage() {
 
   return (
     <Layout>
-      <div className="px-8 py-7 max-w-[700px] w-full">
+      <div className="px-4 py-5 lg:px-8 lg:py-7 max-w-[700px] w-full">
         <div className="mb-6">
           <div className="flex items-center gap-2.5 mb-1.5">
             <User size={22} className="text-ink" />

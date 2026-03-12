@@ -41,11 +41,11 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
       {/* Power controls */}
       <div>
         <h4 className={sectionLabel}>Power Control</h4>
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-2">
           <button
             onClick={() => send('start', undefined, 'Turbine started')}
             disabled={!!loading || turbineStatus === TurbineStatus.Running}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-success/[12%] text-success border-success/30 hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-[5px] text-[0.8rem] font-semibold rounded-md cursor-pointer border transition-all duration-150 bg-success/[12%] text-success border-success/30 hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading === 'start' ? <Spinner /> : <Play size={13} />}
             Start
@@ -70,11 +70,11 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
       </div>
 
       {/* Blade pitch + Telemetry interval */}
-      <div className="flex gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1">
           <h4 className={sectionLabel}>Blade Pitch</h4>
           <div className="flex gap-2 items-start">
-            <div className="flex-1">
+            <div className="flex-[3]">
               <input
                 type="number"
                 value={pitchValue}
@@ -95,7 +95,7 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
                 send('setPitch', { angle: a }, `Blade pitch set to ${a}°`);
               }}
               disabled={!!loading || turbineStatus !== TurbineStatus.Running || pitchValue === initialPitch.current}
-              className="shrink-0 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading === 'setPitch' ? <Spinner /> : <Sliders size={13} />}
               Set
@@ -103,12 +103,12 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
           </div>
         </div>
 
-        <div className="w-px bg-edge self-stretch" />
+        <div className="hidden md:block w-px bg-edge self-stretch" />
 
         <div className="flex-1">
           <h4 className={sectionLabel}>Telemetry Interval</h4>
           <div className="flex gap-2 items-start">
-            <div className="flex-1">
+            <div className="flex-[3]">
               <input
                 type="number"
                 value={intervalValue}
@@ -129,7 +129,7 @@ export default function TurbineControls({ turbineId, turbineStatus, onCommandSen
                 send('setInterval', { value: v }, `Telemetry interval set to ${v}s`);
               }}
               disabled={!!loading || turbineStatus !== TurbineStatus.Running || intervalValue === initialInterval.current}
-              className="shrink-0 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 h-10 flex items-center justify-center gap-1.5 px-3 text-[0.8rem] font-medium rounded-md cursor-pointer border transition-all duration-150 bg-card text-ink border-edge hover:bg-lift hover:border-edge-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading === 'setInterval' ? <Spinner /> : <Clock size={13} />}
               Set

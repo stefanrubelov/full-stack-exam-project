@@ -51,7 +51,7 @@ export default function MaintenancePage() {
 
   return (
     <Layout>
-      <div className="px-8 py-7 max-w-[1400px] w-full">
+      <div className="px-4 py-5 lg:px-8 lg:py-7 max-w-[1400px] w-full">
         <div className="mb-6">
           <div className="flex items-center gap-2.5 mb-1.5">
             <Wrench size={22} className="text-ink" />
@@ -96,6 +96,7 @@ export default function MaintenancePage() {
               <p className="text-dim font-semibold">No maintenance records found</p>
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-[0.85rem]">
               <thead>
                 <tr className="border-b border-edge text-left">
@@ -132,6 +133,7 @@ export default function MaintenancePage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 
