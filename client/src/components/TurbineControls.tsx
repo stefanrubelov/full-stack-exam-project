@@ -14,7 +14,7 @@ interface Props {
 }
 
 const sectionLabel = 'text-dim text-[0.72rem] uppercase tracking-[0.8px] mb-2.5 font-semibold';
-const inputClass = 'w-full bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[9px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(56,189,248,0.15)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans disabled:opacity-50 disabled:cursor-not-allowed';
+const inputClass = 'w-full bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[9px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(13,27,42,0.12)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans disabled:opacity-50 disabled:cursor-not-allowed';
 
 function Spinner() {
   return <span className="inline-block w-3 h-3 rounded-full border-[1.5px] border-edge border-t-accent animate-spin shrink-0" />;
@@ -204,7 +204,7 @@ export function CommandHistory({ commands }: { commands: TurbineCommand[] }) {
             key={cmd.id}
             className="flex items-start gap-2.5 px-3 py-2.5 bg-canvas rounded-lg border border-edge"
           >
-            <Send size={13} color="#38bdf8" className="mt-0.5 shrink-0" />
+            <Send size={13} color="#0D1B2A" className="mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-[0.85rem] text-accent">{cmd.action}</span>

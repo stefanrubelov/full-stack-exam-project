@@ -94,9 +94,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Main content */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 items-start">
+        <div className="grid grid-cols-4 gap-4 items-start">
           {/* Turbines grid */}
-          <div>
+          <div className="col-span-4 lg:col-span-3">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-ink">Turbines</h2>
             </div>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Alerts sidebar */}
-          <div>
+          <div className="col-span-4 lg:col-span-1">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Bell size={17} className="text-ink" />

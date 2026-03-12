@@ -45,16 +45,16 @@ export default function MetricsChart({ metrics, config, height = 200 }: Props) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={chartData} margin={{ top: 4, right: 8, left: -10, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#2a3a52" />
+        <CartesianGrid strokeDasharray="3 3" stroke="#E0DDD6" />
         <XAxis
           dataKey="time"
-          tick={{ fill: '#4d6280', fontSize: 10 }}
+          tick={{ fill: '#9BA3AF', fontSize: 10 }}
           axisLine={false}
           tickLine={false}
           interval="preserveStartEnd"
         />
         <YAxis
-          tick={{ fill: '#4d6280', fontSize: 10 }}
+          tick={{ fill: '#9BA3AF', fontSize: 10 }}
           axisLine={false}
           tickLine={false}
           width={40}

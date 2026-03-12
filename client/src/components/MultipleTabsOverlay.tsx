@@ -41,7 +41,7 @@ export default function MultipleTabsOverlay() {
   if (!isDuplicate) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0b1120]/90 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0D1B2A]/80 backdrop-blur-sm">
       <div className="bg-card border border-edge rounded-2xl px-10 py-10 max-w-md w-full text-center shadow-2xl">
         <div className="w-14 h-14 rounded-xl bg-warning/[12%] border border-warning/30 flex items-center justify-center mx-auto mb-5">
           <AlertTriangle size={28} className="text-warning" />
@@ -56,7 +56,7 @@ export default function MultipleTabsOverlay() {
         </p>
         <button
           onClick={() => window.close()}
-          className="w-full flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-surface text-[0.85rem] font-semibold cursor-pointer hover:bg-sky-300 transition-colors border-none"
+          className="w-full flex items-center justify-center px-5 py-2.5 rounded-lg bg-accent text-white text-[0.85rem] font-semibold cursor-pointer hover:bg-accent-dark transition-colors border-none"
         >
           Close this tab
         </button>

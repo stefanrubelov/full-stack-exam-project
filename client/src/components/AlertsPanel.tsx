@@ -19,8 +19,8 @@ function timeAgo(iso: string) {
 }
 
 function SeverityIcon({ severity }: { severity: string }) {
-  if (severity === 'critical') return <XCircle size={15} color="#ef4444" />;
-  return <AlertTriangle size={15} color="#f59e0b" />;
+  if (severity === 'critical') return <XCircle size={15} color="#DC2626" />;
+  return <AlertTriangle size={15} color="#B45309" />;
 }
 
 export default function AlertsPanel({ alerts, onAcknowledge, turbineId }: Props) {

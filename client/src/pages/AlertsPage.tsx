@@ -47,7 +47,7 @@ export default function AlertsPage() {
     if (showAcknowledged) refreshAcknowledged();
   };
 
-  const btnActive = 'flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-[0.8rem] font-semibold rounded-md bg-accent text-surface border-none cursor-pointer transition-all duration-150 hover:bg-sky-300';
+  const btnActive = 'flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-[0.8rem] font-semibold rounded-md bg-accent text-white border-none cursor-pointer transition-all duration-150 hover:bg-accent-dark';
   const btnInactive = 'flex items-center justify-center gap-1.5 px-3.5 py-1.5 text-[0.8rem] font-medium rounded-md bg-card text-ink border border-edge cursor-pointer transition-all duration-150 hover:bg-lift hover:border-edge-light';
 
   return (

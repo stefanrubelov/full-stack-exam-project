@@ -34,7 +34,7 @@ export default function TurbineCard({ data }: Props) {
 
   return (
     <div
-      className="bg-card border border-edge rounded-[10px] p-5 cursor-pointer transition-all duration-150 hover:border-edge-light hover:bg-lift"
+      className="bg-card border border-edge rounded-[10px] p-5 cursor-pointer transition-all duration-150 hover:border-[#0D1B2A]/20 hover:shadow-[0_4px_16px_rgba(13,27,42,0.1)]"
       onClick={() => navigate(`/turbines/${turbine.id}`)}
     >
       {/* Header */}
