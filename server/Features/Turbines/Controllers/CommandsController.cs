@@ -23,6 +23,8 @@ public class CommandsController(MyDbContext db) : ControllerBase
 
         var fromUtc = from.HasValue ? DateTime.SpecifyKind(from.Value, DateTimeKind.Utc) : (DateTime?)null;
         var toUtc   = to.HasValue   ? DateTime.SpecifyKind(to.Value,   DateTimeKind.Utc) : (DateTime?)null;
+        if (toUtc.HasValue && toUtc.Value.TimeOfDay == TimeSpan.Zero)
+            toUtc = toUtc.Value.AddDays(1).AddTicks(-1);
 
         var query = db.TurbineCommands.AsQueryable();
 

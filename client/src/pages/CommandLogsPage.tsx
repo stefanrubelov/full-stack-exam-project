@@ -24,7 +24,7 @@ const actionColor: Record<string, string> = {
   setInterval: 'text-warning',
 };
 
-const inputClass = 'bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[7px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(56,189,248,0.15)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans';
+const inputClass = 'bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[7px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(13,27,42,0.12)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans';
 
 export default function CommandLogsPage() {
   const [result, setResult] = useState<CommandsPage>({ total: 0, page: 1, pageSize: PAGE_SIZE, items: [] });
@@ -120,7 +120,7 @@ export default function CommandLogsPage() {
           </div>
           <button
             onClick={apply}
-            className="flex items-center gap-1.5 px-4 py-[8px] text-[0.8rem] font-semibold rounded-md bg-accent text-surface border-none cursor-pointer transition-all duration-150 hover:bg-sky-300"
+            className="flex items-center gap-1.5 px-4 py-[8px] text-[0.8rem] font-semibold rounded-md bg-accent text-white border-none cursor-pointer transition-all duration-150 hover:bg-accent-dark"
           >
             Apply
           </button>
@@ -176,7 +176,7 @@ export default function CommandLogsPage() {
                             className="flex items-center gap-2 no-underline hover:text-accent transition-colors duration-150 w-fit"
                             onClick={e => e.stopPropagation()}
                           >
-                            <Send size={12} color="#38bdf8" className="shrink-0" />
+                            <Send size={12} color="#0D1B2A" className="shrink-0" />
                             <span className="text-ink font-medium hover:text-accent">{turbine?.name ?? `…${cmd.turbineId.slice(-8)}`}</span>
                           </Link>
                         </td>

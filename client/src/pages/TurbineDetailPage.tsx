@@ -145,7 +145,7 @@ export default function TurbineDetailPage() {
     return (
       <Layout>
         <div className="flex justify-center items-center h-full p-10">
-          <span className="inline-block w-8 h-8 rounded-full border-2 border-edge border-t-accent animate-spin" />
+          <span className="inline-block w-8 h-8 rounded-full border-2 border-edge border-t-[#0D1B2A] animate-spin" />
         </div>
       </Layout>
     );
@@ -193,8 +193,8 @@ export default function TurbineDetailPage() {
         {/* Turbine header */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-[52px] h-[52px] rounded-xl bg-gradient-to-br from-sky-500 to-accent flex items-center justify-center shrink-0">
-              <Wind size={26} color="#0b1120" />
+            <div className="w-[52px] h-[52px] rounded-xl bg-[#0D1B2A] flex items-center justify-center shrink-0">
+              <Wind size={26} color="#8ea4c4" />
             </div>
             <div>
               <div className="flex items-center gap-2.5 mb-1">

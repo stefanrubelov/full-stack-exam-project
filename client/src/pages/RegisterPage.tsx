@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../api/apiClient';
 import { Wind, UserPlus } from 'lucide-react';
 
-const inputClass = 'w-full bg-canvas border border-edge rounded-md text-ink text-sm px-3 py-[9px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(56,189,248,0.15)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans';
+const inputClass = 'w-full bg-canvas border border-edge rounded-md text-ink text-sm px-3 py-[9px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(13,27,42,0.12)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -38,14 +38,12 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface p-6">
-      {/* Background glow */}
-      <div className="fixed top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(56,189,248,0.06)_0%,transparent_70%)] pointer-events-none" />
 
       <div className="w-full max-w-[400px]">
         {/* Logo */}
         <div className="text-center mb-9">
-          <div className="w-14 h-14 rounded-[14px] bg-gradient-to-br from-sky-500 to-accent flex items-center justify-center mx-auto mb-4 shadow-[0_0_32px_rgba(56,189,248,0.25)]">
-            <Wind size={28} color="#0b1120" />
+          <div className="w-14 h-14 rounded-[14px] bg-[#0D1B2A] flex items-center justify-center mx-auto mb-4 shadow-[0_4px_16px_rgba(13,27,42,0.2)]">
+            <Wind size={28} color="#8ea4c4" />
           </div>
           <h1 className="text-2xl font-bold text-ink">WindWatch</h1>
           <p className="text-dim mt-1 text-sm">Offshore Wind Farm Monitor</p>
@@ -130,10 +128,10 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 flex items-center justify-center gap-1.5 px-5 py-[11px] text-[0.9rem] font-semibold rounded-md bg-accent text-surface cursor-pointer border-none transition-all duration-150 hover:bg-sky-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="mt-1 flex items-center justify-center gap-1.5 px-5 py-[11px] text-[0.9rem] font-semibold rounded-md bg-accent text-white cursor-pointer border-none transition-all duration-150 hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading
-                ? <span className="inline-block w-[18px] h-[18px] rounded-full border-2 border-surface/40 border-t-surface animate-spin shrink-0" />
+                ? <span className="inline-block w-[18px] h-[18px] rounded-full border-2 border-white/40 border-t-white animate-spin shrink-0" />
                 : <UserPlus size={16} />
               }
               {loading ? 'Creating account…' : 'Create account'}

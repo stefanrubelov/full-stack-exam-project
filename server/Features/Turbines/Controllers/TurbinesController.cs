@@ -73,6 +73,8 @@ public class TurbinesController(
         var toUtc = to.HasValue
             ? DateTime.SpecifyKind(to.Value, DateTimeKind.Utc)
             : DateTime.UtcNow;
+        if (toUtc.TimeOfDay == TimeSpan.Zero)
+            toUtc = toUtc.AddDays(1).AddTicks(-1);
 
         var metrics = db.TurbineMetrics
             .Where(m => m.TurbineId == id && m.Timestamp >= fromUtc && m.Timestamp <= toUtc)

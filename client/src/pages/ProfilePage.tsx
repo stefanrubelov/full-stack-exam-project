@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/useAuth';
 import { User, KeyRound, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const inputClass = 'bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[7px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(56,189,248,0.15)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans w-full';
+const inputClass = 'bg-canvas border border-edge rounded-md text-ink text-[0.85rem] px-3 py-[7px] outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(13,27,42,0.12)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint font-sans w-full';
 const labelClass = 'text-[0.7rem] text-faint uppercase tracking-[0.7px] font-semibold';
 
 export default function ProfilePage() {
@@ -87,7 +87,7 @@ export default function ProfilePage() {
               <button
                 onClick={saveName}
                 disabled={savingName || !name.trim() || name === user?.name}
-                className="flex items-center gap-1.5 px-4 py-[8px] text-[0.8rem] font-semibold rounded-md bg-accent text-surface border-none cursor-pointer transition-all duration-150 hover:bg-sky-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-4 py-[8px] text-[0.8rem] font-semibold rounded-md bg-accent text-white border-none cursor-pointer transition-all duration-150 hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check size={14} />
                 {savingName ? 'Saving…' : 'Save name'}
@@ -139,7 +139,7 @@ export default function ProfilePage() {
               <button
                 onClick={savePassword}
                 disabled={savingPassword}
-                className="flex items-center gap-1.5 px-4 py-[8px] text-[0.8rem] font-semibold rounded-md bg-accent text-surface border-none cursor-pointer transition-all duration-150 hover:bg-sky-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-4 py-[8px] text-[0.8rem] font-semibold rounded-md bg-accent text-white border-none cursor-pointer transition-all duration-150 hover:bg-accent-dark disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check size={14} />
                 {savingPassword ? 'Saving…' : 'Save password'}
